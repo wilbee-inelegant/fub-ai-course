@@ -1,7 +1,7 @@
 # Episode 2: Stages and contact cleanup
 ## Agent instructions for the Follow Up Boss + AI course
 
-**Draft for Will Gray’s review · Version 0.4 · November 2, 2026**  
+**Draft for Will Gray’s review · Version 0.5 · November 2, 2026**  
 Audience: solo residential real estate agents who own their Follow Up Boss account.  
 Prepared by Inelegant Solutions. This is the detailed agent walkthrough accompanying Episode 2, not a presenter script or slide deck. The workflow has not been live-tested end to end.
 
@@ -32,7 +32,7 @@ Be candid about uncertainty and the limits of what you can verify. These instruc
 
 ## Copy this prompt to your agent
 
-Read this entire walkthrough. Begin the actual walkthrough with the short, once-only AI-limits and human-help disclosure in this file. When I explicitly ask to start the audit and the required read access is authorized, guide me through a read-only audit of my Follow Up Boss **people/contact stages**. First inspect the available MCP tools and permissions. Pull the stage list in its current order. Strongly recommend keeping Lead for new, not-yet-qualified inquiries, explain the intake/qualification rationale, and document any informed deliberate exception and its intake handling. Help me confirm the other stage meanings and my objectives. Then recommend a concise, descriptively named stage map that fits my workflow and gives every retained contact an appropriate home. Keep intent, geography and other attributes in suitable tags/custom fields, and prefer the native Timeframe to Move field for expected move timing. Explain your recommendation and its trade-offs before evaluating adoption or proposing cleanup. Then obtain reliable per-stage counts, save the map for my review, and guide me to the later bounded contact-sample review when I choose to continue. Do not download every contact. Do not use the Contacted boolean/status flag. In read-only audit mode, do not change stages, contacts, assignments, tasks, automations or messages. Pause at the checkpoints below and produce a reviewable stage map and evidence summary.
+Read this entire walkthrough. Begin the actual walkthrough with the short, once-only AI-limits and human-help disclosure in this file. When I explicitly ask to start the audit and the required read access is authorized, guide me through a read-only audit of my Follow Up Boss **people/contact stages**. First inspect the available MCP tools and permissions before offering description writes or dependency audits; distinguish inventory from actual definitions and flag unsupported parts for manual review. Pull the stage list in its current order. Strongly recommend keeping Lead for new, not-yet-qualified inquiries, explain the intake/qualification rationale, and document any informed deliberate exception and its intake handling. Help me confirm the other stage meanings and my objectives. Then recommend a concise, descriptively named stage map that fits my workflow and gives every retained contact an appropriate home. Keep intent, geography and other attributes in suitable tags/custom fields, and prefer the native Timeframe to Move field for expected move timing. Explain your recommendation and its trade-offs before evaluating adoption or proposing cleanup. Then obtain reliable per-stage counts, save the map for my review, and guide me to the later bounded contact-sample review when I choose to continue. Do not download every contact. Do not use the Contacted boolean/status flag. In read-only audit mode, do not change stages, contacts, assignments, tasks, automations or messages. Pause at the checkpoints below and produce a reviewable stage map and evidence summary.
 
 ## Scope and boundaries
 
@@ -58,11 +58,33 @@ A tool being advertised does not prove the connection is authenticated, authoriz
 
 Use small deliberate read requests only after the user has asked to begin and any required live-access permission is in place. Set limits explicitly; do not inherit a connector’s bulk-oriented defaults. Generic pagination advice in tool descriptions does not require a full contact export for this bounded exercise. Finish the stage inventory; bound contact retrieval.
 
+### Capability preflight: check before offering
+
+Before offering to write stage descriptions or audit every dependency, verify the exact operation and the evidence it can return. Separate **tool/schema availability**, **account/API access**, **returned information**, and **user approval**. Account-owner permissions do not create missing endpoints, satisfy registered-system requirements or authorize assistant writes.
+
+| Requested help | Current documented/inspected capability | Honest next step |
+|---|---|---|
+| Change stage name/order | Public stage update documents `name` and `orderWeight`; requires a suitable write-capable connection and eligible stage | Preview exact supported changes and obtain approval; protect core/Zillow stages |
+| Write stage definitions into CRM descriptions | Current inspected MCP/public stage-update schema has no description parameter; owner UI supports descriptions | Save definitions/objectives in the map; provide copyable text for optional owner-operated Admin > Stages editing |
+| Audit Smart Lists | List/get exposes inventory metadata, not supported full filter definitions through the inspected route | Inventory first; inspect actual relevant filters through user review or permitted UI before claiming dependency coverage |
+| Audit Action Plans | List metadata only; no inspected `get_action_plan` definition route exposing complete steps/triggers; `actionPlansPeople` is enrollment/run information | Identify plans for targeted manual inspection; names and enrollments do not establish their logic |
+| Audit Automations | List/get tools structurally available; official routes require Automations 2.0 and a registered system; response schemas do not establish complete definition coverage | After authorized reads, report actual access and returned trigger/condition/action fields; unresolved details need manual review |
+
+Sources: [stage update](https://docs.followupboss.com/reference/stages-id-put), [owner stage UI](https://help.followupboss.com/hc/en-us/articles/4402370671767-Custom-Stages), [Smart List inventory](https://docs.followupboss.com/reference/smartlists-get), [Smart List get](https://docs.followupboss.com/reference/smartlist-id-get), [Action Plans](https://docs.followupboss.com/reference/actionplans-get), [Automation list](https://docs.followupboss.com/reference/automations), [Automation get](https://docs.followupboss.com/reference/automationsid). These are inspected-route limits, not claims that the FUB interface lacks those features.
+
+For an authorized Smart List inventory, use the installed equivalent of `all: true` and finish pagination within the agreed visible scope. The documented default returns Classic lists only. Completing this configuration inventory does not authorize downloading all matching people. Report partial inventory when pages or visibility are missing.
+
+An empty/generic response schema does not promise complete automation definitions. On a failed read, record the exact tool/endpoint, sanitized error or HTTP status, account context and unknowns. Empty results, denied access and unsupported operations are different outcomes.
+
+**Do not recommend enabling write flags to fix read failures.** Reviewed fub-mcp 0.3.0 policy returns GET operations before write/delete/workflow-trigger gates. `FUB_MCP_ALLOW_AUTOMATIONS` being off does not itself block GET. Check the actual installed version and error; do not guess a local flag explains an account/API restriction. Do not change flags, register a system, widen grants, trigger a workflow or invent an endpoint. [Version-pinned policy](https://github.com/wilbee-inelegant/fub-mcp/blob/721485e03433a34d84d26d74c4068ce5eb1e332a/src/policy.ts).
+
+Say plainly: “I can save the definitions in your map and give you text to paste into the stage descriptions. With authorized, working read access, I can inventory lists and plans, but their names alone do not reveal every rule using these stages. We need the relevant settings reviewed in FUB before making dependent changes.”
+
 ## 1. Read the stages and interview me
 
 Use the installed MCP operation corresponding to GET /v1/stages. In the currently inspected private bridge it is `list_stages` (connector prefix varies). Discover the actual installed name and schema rather than assuming that prefix. Known query options are `limit`, `offset` and `sort`. Use `sort: orderWeight` and `limit: 100`. If the stage list itself has another page, finish the small stage inventory. The restriction on bulk pagination below concerns people, not finishing the stage definitions.
 
-Preserve each returned `id`, `name`, `orderWeight`, `isProtected`, and `peopleCount` when present. Preserve source descriptions if returned. Do not manufacture absent fields. Present the current order before proposing a new one.
+Preserve each returned `id`, `name`, `orderWeight`, `isProtected`, and `peopleCount` when present. Preserve source descriptions only if actually returned; absence does not prove the UI description is empty. Keep definitions/objectives in the map rather than promising an MCP description write. Do not manufacture absent fields. Present the current order before proposing a new one.
 
 ### Lead: give a strong default recommendation
 
@@ -196,7 +218,7 @@ Use the following as an optional vocabulary/reference, especially where Zillow r
 
 Apply the design tests above rather than adopting every reference stage. Check integrations, Smart Lists, action plans, automations and external Zaps before proposing renames or consolidations. Protected system and Zillow-linked stages remain subject to section 3.
 
-Extend the agreed map with proposed consolidation, proposed new stages and proposed display order. Put sequential steps in a useful chronological order, while keeping buyer/seller branches and relationship groups understandable; do not imply every person must pass through one linear funnel. Maintain separate columns for current state and proposal. Definitions, objectives and entry/exit rules belong in the review document; do not assume the API exposes a writable field for every item in the business map.
+Extend the agreed map with proposed consolidation, proposed new stages and proposed display order. Put sequential steps in a useful chronological order, while keeping buyer/seller branches and relationship groups understandable; do not imply every person must pass through one linear funnel. Maintain separate columns for current state and proposal. Definitions, objectives and entry/exit rules belong in the review document. The inspected stage-update API/MCP cannot write descriptions; optionally provide text for the owner UI. Do not invent a description argument.
 
 ## 3. Respect system and Zillow protections
 
@@ -232,11 +254,34 @@ Save the confirmed map now, before contact-cleanup decisions. Use the following 
 
 **Checkpoint B — saved map:** Recommend Google Docs or another document service if needed, and offer to save the agreed stage map somewhere the user can view it. Recommend a connection without creating or granting one automatically. If no document connection is available, provide a downloadable Markdown file or complete copyable text, and record the limitation. Verify destination/access and saved content. Keep client data private. Ask the user to review the agreed definitions and proposed stage map. Leave not-yet-reviewed contact findings pending. Do not apply proposals automatically.
 
+### Dependency review and manual checks
+
+Dependency review is conditional work, not a guaranteed automated audit. Identify relevant Smart Lists, Action Plans, Automations, Lead Flow/intake settings and known external integrations for each proposed stage change. Use supported authorized reads for inventory and whatever definitions actually appear. A resource name is not proof that a stage is or is not referenced.
+
+Record separate coverage dimensions:
+
+| Resource / exact IDs / visible scope | Inventory coverage | Rule inspection coverage | Evidence and next step |
+|---|---|---|---|
+| Relevant lists/plans/automations/integrations | Complete within scope / partial / unavailable | Inspected for this change / partial / pending manual review | Actual returned fields or reviewed UI criteria; unresolved question and responsible person |
+
+**Inventory complete does not mean filters, steps or triggers were inspected.** Keep “inspection partial” and “pending manual review” visible in the summary and approval packet. Do not say “dependency audit complete,” “no dependencies,” or “safe to change” while material coverage is missing. You can hand off the stage-map design with limitations; affected implementation remains paused until the relevant uncertainty is resolved.
+
+When connector coverage is insufficient, guide the owner through this targeted checklist:
+
+1. **Stage descriptions:** In Admin > Stages, open the exact stage and compare its existing description with the map. Offer proposed text without saving during read-only inspection. Saving it is a separate optional, specifically approved change under the implementation gate below. If the owner chooses that later step, confirm field and stage first; do not silently change name/order too. Mark the result owner-reported or independently verified.
+2. **Smart Lists:** Open each relevant list's filter settings. Record stage inclusions/exclusions, AND/OR grouping, assignment/pond scope, other criteria and visibility/sharing. Check old/destination stages and multi-stage conditions. Matching people alone do not reveal the filter definition. Do not save changed filters during read-only review.
+3. **Action Plans:** Open the relevant plan and inspect actual steps, stage updates, tasks/messages, timing and conditions. Separately inspect the Lead Flow or automation settings that apply it. Enrollment records do not show the whole plan or its entry logic.
+4. **Automations:** Inspect the relevant trigger, conditions, actions, enabled/disabled state and repeat/run constraints in the account's available interface. Check both old-stage and destination references. Do not enable, trigger, enroll or test an automation to discover behavior.
+5. **External systems:** Ask which known integrations, Zillow mappings or Zaps use the stages. Inspect only authorized relevant settings or owner-provided evidence. Mark inaccessible systems unreviewed; FUB-only reads cannot establish that no external dependency exists.
+6. **Reconcile:** Record each setting, its stage reference, evidence date, reviewer and proposed correction in the same map. Label recollections as user-reported. Resolve material dependency questions before requesting approval for the affected operation.
+
+Owner-led checks do not require granting the assistant browser control. Assistant-operated UI help still requires the app/browser consent rules below. If no authorized route supplies missing evidence, leave it pending and offer qualified human help instead of inventing capability or pushing for broader access.
+
 ## 6. Optional application with separate specific approval
 
 This phase describes a later user-directed workflow. Reading this file alone does not authorize a mutation. Finish the stage interview, bounded count review and saved-map approval first. This is optional stage-map implementation, before the later contact-cleanup review; it does not require or authorize contact-by-contact reclassification. If the user wants to stay entirely read-only, skip implementation and continue reviewing samples against the confirmed current map. Keep proposed future stages visibly separate from stages that actually exist.
 
-For eligible **people stages** only, preview requested create/rename/reorder operations, exact current names and IDs, proposed values and order, affected contact counts, dependencies and risks. Ask for explicit permission for that specific set. Use the actual installed tool schemas. After a rename, track the stable ID so later operations do not use an obsolete name or a guessed new stage.
+Apply the capability preflight before offering implementation. Saving definitions in the map does not save CRM descriptions. For eligible **people stages** only, preview requested create/rename/reorder operations, exact current names and IDs, proposed values and order, affected contact counts, dependencies and risks. Ask for explicit permission for that specific set. Use the actual installed tool schemas. After a rename, track the stable ID so later operations do not use an obsolete name or a guessed new stage.
 
 For an optional stage retirement, offer either (a) a supported delete operation with an explicitly approved destination stage ID and verified transfer semantics or (b) user-performed deletion in the FUB UI. Do not delete a protected stage. Confirm the exact source and destination names/IDs, whether contacts will transfer, count scope, integration/automation/Smart List dependencies and recoverability limits. Verify the destination exists and is appropriate before asking approval. The user reports mixed results with API deletion, so do not promise it will work.
 
@@ -315,6 +360,7 @@ Use one private working document. Keep technical evidence in an appendix so the 
 - Exact count source and scope; unknown totals:
 - Sample budget, unique people reviewed and selection method:
 - Missing fields or unavailable context:
+- Dependency inventory coverage versus actual rule inspection; pending manual checks:
 - Mode: review only / read-only audit / specifically approved implementation:
 
 ### Stage map
@@ -380,6 +426,11 @@ An offline acceptance review should cover these cases:
 
 | Case | Required behavior |
 |---|---|
+| User requests MCP description writes | Explain unsupported field; save map and offer owner UI text, without invented arguments |
+| Smart List default returns Classic lists only | Use supported all=true and pagination; do not equate inventory with filter inspection |
+| Action Plan names or enrollments are returned | Treat as metadata/run evidence, not steps/triggers; request targeted manual review |
+| Automation GET fails or lacks definition fields | Record actual error/fields; do not recommend enabling write flags |
+| Inventory is complete but rules unread | Report inspection partial or pending manual review; pause affected changes |
 | Actual walkthrough starts | Give the concise AI-limits disclosure once and name Inelegant Solutions plus other qualified consultants without an exclusive sales pitch |
 | User asks only to review the instructions | Edit or critique the document; no CRM call |
 | Live access is disabled | Explain the precise blocked read; no credential or permission workaround |
@@ -413,6 +464,8 @@ An offline acceptance review should cover these cases:
 
 ## Sources and validation notes
 
+November 2 capability correction: official route documentation, advertised read schemas and version-pinned fub-mcp policy reviewed. Stage descriptions, inventory versus definitions, and conditional Automation access are now explicit. No live CRM calls, permission changes or workflow tests were performed for this revision.
+
 November 2, 2026: Lead-definition guidance and once-only AI-limits/human-help disclosure revised after user-reported Grok audit feedback. Official FUB stage definitions and person-creation API defaults checked; no account-specific intake behavior was live-tested in this revision. The feedback establishes a live user trial, not a completed end-to-end validation.
 
 The preceding draft records source checks on October 31, 2026. Revision review on November 1, 2026 rechecked the installed read-tool metadata and official people/stages, stage-deletion, core-stage, Zillow initial-integration and Mass Actions documentation. The November 1 design revision also checked the native Timeframe to Move guide, official person-update timeframeId documentation and installed timeframe/people read schemas; no timeframe IDs or live values were fetched. No live CRM calls were made. Recheck operation-specific documentation and installed schemas before execution after tool changes.
@@ -431,4 +484,5 @@ The preceding draft records source checks on October 31, 2026. Revision review o
 The current private bridge identifies itself as based on fub-mcp 0.3.0. Public repository schema inspection was not version-pinned to that release. Discover the installed tool schema before running. These documents have been researched, not live-tested against a customer account.
 
 Course setup destination: https://inelegant.solutions/fub/mcp (intended public destination; production readiness not verified in this revision). Consultation: https://calendly.com/wilbee-inelegant/meet-with-will . No YouTube playlist URL is assigned yet.
+
 

@@ -5,7 +5,7 @@ Draft course materials from Inelegant Solutions, for Will Gray’s review.
 
 ## Episode 2: Stages and contact cleanup
 
-[Read the agent walkthrough](FUB-Stage-Audit-Walkthrough.md) — version 0.4, November 2, 2026.
+[Read the agent walkthrough](FUB-Stage-Audit-Walkthrough.md) — version 0.5, November 2, 2026.
 
 This standalone Markdown file contains the agent instructions accompanying Episode 2. It is not a presenter script or slide deck, and the workflow has not been live-tested end to end.
 
